@@ -1,0 +1,59 @@
+{
+  // Tastic Rice — Zed configuration
+  // Matches the Tokyo Night / Nerd Font aesthetic used across the setup.
+  "theme": {
+    "mode": "dark",
+    "dark": "Tokyo Night",
+    "light": "One Light"
+  },
+  "vim_mode": true,
+  "base_keymap": "VSCode",
+
+  // Fonts — same Nerd Font family installed by install.sh
+  "buffer_font_family": "MesloLGS Nerd Font Mono",
+  "buffer_font_size": 15,
+  "ui_font_family": "MesloLGS Nerd Font",
+  "ui_font_size": 15,
+
+  // Editor behaviour
+  "format_on_save": "on",
+  "tab_size": 2,
+  "soft_wrap": "editor_width",
+  "relative_line_numbers": true,
+  "cursor_blink": false,
+  "scrollbar": {
+    "show": "never"
+  },
+  "inlay_hints": {
+    "enabled": true
+  },
+
+  // Terminal
+  "terminal": {
+    "font_family": "MesloLGS Nerd Font Mono",
+    "font_size": 15,
+    "shell": {
+      "program": "zsh"
+    }
+  },
+
+  // Keep the UI clean
+  "tab_bar": {
+    "show": true
+  },
+  "toolbar": {
+    "breadcrumbs": true,
+    "quick_actions": false
+  },
+  "telemetry": {
+    "diagnostics": false,
+    "metrics": false
+  },
+
+  // Language servers / autosave
+  "autosave": {
+    "after_delay": {
+      "milliseconds": 1000
+    }
+  }
+}

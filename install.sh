@@ -27,8 +27,16 @@ INSTALL="📦"
 CONFIG="⚙️"
 COPY="📋"
 
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Space-separated list of casks to skip. Useful for headless/CI runs where
+# password-prompting .pkg casks (e.g. the Microsoft apps) can't complete.
+# Example: SKIP_CASKS="microsoft-teams microsoft-outlook" ./install.sh
+SKIP_CASKS="${SKIP_CASKS:-}"
+
+# Get the directory where this script is located.
+# Note: this script runs under zsh (see shebang), which does not populate
+# ${BASH_SOURCE[0]}. ${0:A:h} resolves the script's own absolute directory
+# regardless of the current working directory it was invoked from.
+SCRIPT_DIR="${0:A:h}"
 
 # Logging function
 log() {
@@ -49,18 +57,32 @@ install_brew_package() {
     local is_cask=$2
     
     if [[ "$is_cask" == "cask" ]]; then
+        if [[ " $SKIP_CASKS " == *" $package "* ]]; then
+            log "$WARNING" "Skipping $package (listed in SKIP_CASKS)" "$YELLOW"
+            return 0
+        fi
         if brew list --cask "$package" >/dev/null 2>&1; then
             log "$SUCCESS" "$package (cask) already installed" "$GREEN"
         else
             log "$INSTALL" "Installing $package (cask)..." "$BLUE"
-            brew install --cask "$package"
+            # --adopt takes over a pre-existing (manually installed) app instead
+            # of erroring. Cask failures are non-fatal (a GUI app that needs a
+            # password, or is already present) so the rest of the setup — most
+            # importantly the config-copy phase — still runs to completion.
+            if ! brew install --cask --adopt "$package"; then
+                log "$WARNING" "Could not install $package (cask) automatically — install it manually later" "$YELLOW"
+            fi
         fi
     else
         if brew list --formula "$package" >/dev/null 2>&1; then
             log "$SUCCESS" "$package already installed" "$GREEN"
         else
             log "$INSTALL" "Installing $package..." "$BLUE"
-            brew install "$package"
+            # Non-fatal so a single formula (e.g. one from a not-yet-trusted
+            # third-party tap) can't abort the whole setup before configs copy.
+            if ! brew install "$package"; then
+                log "$WARNING" "Could not install $package — install it manually later" "$YELLOW"
+            fi
         fi
     fi
 }
@@ -123,23 +145,44 @@ install_brew_package "gh"         # GitHub CLI
 echo -e "\n${PURPLE}=== Installing GUI Applications ===${NC}"
 
 install_brew_package "firefox" "cask"
+install_brew_package "google-chrome" "cask"   # bound to alt-d in AeroSpace
 install_brew_package "visual-studio-code" "cask"
+install_brew_package "cursor" "cask"          # bound to alt-c in AeroSpace
 install_brew_package "microsoft-teams" "cask"
+install_brew_package "microsoft-outlook" "cask" # bound to alt-m in AeroSpace
+install_brew_package "whatsapp" "cask"        # bound to alt-p in AeroSpace
+install_brew_package "obsidian" "cask"        # bound to alt-o in AeroSpace
 install_brew_package "wezterm" "cask"
+install_brew_package "zed" "cask"
+
+# AeroSpace lives in the maintainer's tap, not homebrew/cask.
+if ! brew tap | grep -qi "nikitabobko/tap"; then
+    log "$INFO" "Adding nikitabobko/tap..." "$CYAN"
+    brew tap nikitabobko/tap
+fi
+# Homebrew 6+ requires third-party taps to be explicitly trusted before it
+# will load their casks/formulae.
+brew trust nikitabobko/tap 2>/dev/null || true
 install_brew_package "aerospace" "cask"
 install_brew_package "raycast" "cask"
+
+# Sketchybar (status bar driven by AeroSpace) lives in the FelixKratz tap,
+# not homebrew-core, so tap it first.
+if ! brew tap | grep -qi "felixkratz/formulae"; then
+    log "$INFO" "Adding FelixKratz/formulae tap..." "$CYAN"
+    brew tap FelixKratz/formulae
+fi
+# Homebrew 6+ requires third-party taps to be explicitly trusted.
+brew trust felixkratz/formulae 2>/dev/null || true
+install_brew_package "sketchybar"
 
 # =============================================================================
 # 🔤 Install Fonts
 # =============================================================================
 echo -e "\n${PURPLE}=== Installing Fonts ===${NC}"
 
-# Add the font tap if it doesn't exist
-if ! brew tap | grep -q "homebrew/cask-fonts"; then
-    log "$INFO" "Adding homebrew/cask-fonts tap..." "$CYAN"
-    brew tap homebrew/cask-fonts
-fi
-
+# Note: the old 'homebrew/cask-fonts' tap was deprecated/archived in 2024.
+# Nerd Font casks now live in the default 'homebrew/cask', so no tap is needed.
 install_brew_package "font-meslo-lg-nerd-font" "cask"
 install_brew_package "font-fira-code-nerd-font" "cask"
 install_brew_package "font-hack-nerd-font" "cask"
@@ -154,8 +197,10 @@ install_brew_package "powerlevel10k"
 install_brew_package "zsh-autosuggestions"
 install_brew_package "zsh-syntax-highlighting"
 
-# Set Zsh as default shell if it isn't already
-if [[ "$SHELL" != "$(which zsh)" ]]; then
+# Set Zsh as default shell only if the login shell isn't already a zsh.
+# (Comparing basenames avoids a pointless password-prompting chsh when the
+# user is already on macOS's default /bin/zsh but Homebrew provides its own.)
+if [[ "$(basename "$SHELL")" != "zsh" ]]; then
     log "$CONFIG" "Setting Zsh as default shell..." "$YELLOW"
     chsh -s "$(which zsh)"
 fi
@@ -168,6 +213,7 @@ echo -e "\n${PURPLE}=== Creating necessary directories ===${NC}"
 directories=(
     "$HOME/.config"
     "$HOME/.config/nvim"
+    "$HOME/.config/zed"
     "$HOME/.tmux/plugins"
 )
 
@@ -218,6 +264,17 @@ log "$COPY" "Copying Neovim configuration..." "$CYAN"
 backup_config "$HOME/.config/nvim"
 cp -r "$SCRIPT_DIR/nvim" "$HOME/.config/"
 
+# Copy Zed configuration
+log "$COPY" "Copying Zed configuration..." "$CYAN"
+backup_config "$HOME/.config/zed/settings.json"
+cp -v "$SCRIPT_DIR/Zed/settings.json" "$HOME/.config/zed/settings.json"
+
+# Copy Sketchybar configuration (referenced by aerospace.toml)
+log "$COPY" "Copying Sketchybar configuration..." "$CYAN"
+backup_config "$HOME/.config/sketchybar"
+cp -r "$SCRIPT_DIR/Sketchybar/." "$HOME/.config/sketchybar/"
+chmod +x "$HOME/.config/sketchybar/sketchybarrc" "$HOME"/.config/sketchybar/plugins/*.sh
+
 # =============================================================================
 # 🎨 Set Wallpaper
 # =============================================================================
@@ -251,6 +308,19 @@ if command_exists tmux; then
 fi
 
 # =============================================================================
+# 📊 Start Sketchybar
+# =============================================================================
+echo -e "\n${PURPLE}=== Starting Sketchybar ===${NC}"
+
+if command_exists sketchybar; then
+    log "$CONFIG" "Starting Sketchybar service..." "$YELLOW"
+    brew services restart sketchybar
+    log "$SUCCESS" "Sketchybar started" "$GREEN"
+else
+    log "$WARNING" "Sketchybar not found; skipping" "$YELLOW"
+fi
+
+# =============================================================================
 # 🧹 Cleanup and Final Steps
 # =============================================================================
 echo -e "\n${PURPLE}=== Cleanup and Final Steps ===${NC}"
@@ -277,6 +347,7 @@ echo -e "  ${YELLOW}2.${NC} Configure Powerlevel10k by running: ${BLUE}p10k conf
 echo -e "  ${YELLOW}3.${NC} Start AeroSpace from Applications folder"
 echo -e "  ${YELLOW}4.${NC} Open WezTerm and verify the configuration"
 echo -e "  ${YELLOW}5.${NC} Launch Neovim and let Lazy.nvim install plugins"
+echo -e "  ${YELLOW}6.${NC} Open Zed and verify the theme/font (install the Tokyo Night extension if prompted)"
 
 echo -e "\n${PURPLE}🚀 Happy coding!${NC}\n"
 
@@ -288,6 +359,7 @@ echo -e "  ${CYAN}Shell:${NC}        Zsh with Powerlevel10k theme"
 echo -e "  ${CYAN}Terminal:${NC}     WezTerm with custom config"
 echo -e "  ${CYAN}Window Mgr:${NC}   AeroSpace (tiling window manager)"
 echo -e "  ${CYAN}Editor:${NC}       Neovim with custom configuration"
+echo -e "  ${CYAN}GUI Editor:${NC}   Zed with Tokyo Night + vim mode"
 echo -e "  ${CYAN}Multiplexer:${NC}  Tmux with plugins"
 echo -e "  ${CYAN}Git UI:${NC}       Lazygit"
 echo -e "  ${CYAN}File Browser:${NC} Eza (modern ls)"

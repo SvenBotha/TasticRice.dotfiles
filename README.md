@@ -8,8 +8,8 @@ A comprehensive macOS development environment setup that gets you from zero to p
 
 ```bash
 # Clone the repository
-git clone <your-repo-url> ~/dotfiles
-cd ~/dotfiles/MacOS
+git clone https://github.com/SvenBotha/TasticRice.dotfiles.git ~/dotfiles
+cd ~/dotfiles
 
 # Run the installation script
 ./install.sh
@@ -43,7 +43,14 @@ cd ~/dotfiles/MacOS
 - **Visual Studio Code** - Code editor
 - **Microsoft Teams** - Communication
 - **WezTerm** - Terminal emulator
+- **Zed** - Fast GUI code editor (Tokyo Night + vim mode)
+- **Cursor** - AI code editor
+- **Obsidian** - Notes / knowledge base
+- **Google Chrome** - Web browser
+- **Microsoft Outlook** - Email/calendar
+- **WhatsApp** - Messaging
 - **AeroSpace** - Tiling window manager
+- **Sketchybar** - Custom status bar (AeroSpace-aware)
 - **Raycast** - Spotlight replacement
 
 ### 🔤 Fonts
@@ -63,6 +70,8 @@ The script copies the following configurations to their appropriate locations:
 | `AeroSpace/aerospace.toml` | `~/.aerospace.toml` | Window manager config   |
 | `Tmux/tmux.conf`           | `~/.tmux.conf`      | Tmux configuration      |
 | `nvim/`                    | `~/.config/nvim/`   | Neovim configuration    |
+| `Zed/settings.json`        | `~/.config/zed/settings.json` | Zed editor config |
+| `Sketchybar/`              | `~/.config/sketchybar/` | Status bar (AeroSpace-aware) |
 | `wallpapers/koi-fish.jpg`  | Desktop wallpaper   | System wallpaper        |
 
 ## 🔧 Manual Setup Steps
@@ -163,7 +172,7 @@ To update your configurations:
 1. Pull the latest changes:
 
    ```bash
-   cd ~/dotfiles/MacOS
+   cd ~/dotfiles
    git pull
    ```
 
@@ -177,11 +186,9 @@ The script will backup your existing configurations before overwriting them.
 ## 🗂️ Repository Structure
 
 ```
-MacOS/
+TasticRice.dotfiles/
 ├── install.sh                 # Main installation script
-├── sven_tastic_rice_install.sh # Old script (deprecated)
 ├── README.md                  # This file
-├── commands.txt               # Additional commands reference
 ├── AeroSpace/
 │   └── aerospace.toml         # Window manager config
 ├── nvim/                      # Neovim configuration
@@ -192,6 +199,11 @@ MacOS/
 │   └── tmux.conf             # Tmux configuration
 ├── WezTerm/
 │   └── wezterm.lua           # Terminal configuration
+├── Zed/
+│   └── settings.json         # Zed editor configuration
+├── Sketchybar/               # Status bar config + plugins (AeroSpace-aware)
+│   ├── sketchybarrc
+│   └── plugins/
 ├── Zshrc/
 │   └── zshrc                 # Shell configuration
 └── wallpapers/
