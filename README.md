@@ -43,7 +43,7 @@ cd ~/dotfiles
 - **Visual Studio Code** - Code editor
 - **Microsoft Teams** - Communication
 - **WezTerm** - Terminal emulator
-- **Zed** - Fast GUI code editor (Tokyo Night + vim mode)
+- **Zed** - Fast GUI code editor (config from [TasticRice.zed](https://github.com/SvenBotha/TasticRice.zed): leader-key keymap, Cursor base)
 - **Cursor** - AI code editor
 - **Obsidian** - Notes / knowledge base
 - **Google Chrome** - Web browser
@@ -70,7 +70,7 @@ The script copies the following configurations to their appropriate locations:
 | `AeroSpace/aerospace.toml` | `~/.aerospace.toml` | Window manager config   |
 | `Tmux/tmux.conf`           | `~/.tmux.conf`      | Tmux configuration      |
 | `nvim/`                    | `~/.config/nvim/`   | Neovim configuration    |
-| `Zed/settings.json`        | `~/.config/zed/settings.json` | Zed editor config |
+| `TasticRice.zed` (separate repo) | `~/.config/zed/` | Zed editor config (cloned + installed by `install.sh`) |
 | `Sketchybar/`              | `~/.config/sketchybar/` | Status bar (AeroSpace-aware) |
 | `wallpapers/koi-fish.jpg`  | Desktop wallpaper   | System wallpaper        |
 
@@ -199,8 +199,6 @@ TasticRice.dotfiles/
 │   └── tmux.conf             # Tmux configuration
 ├── WezTerm/
 │   └── wezterm.lua           # Terminal configuration
-├── Zed/
-│   └── settings.json         # Zed editor configuration
 ├── Sketchybar/               # Status bar config + plugins (AeroSpace-aware)
 │   ├── sketchybarrc
 │   └── plugins/

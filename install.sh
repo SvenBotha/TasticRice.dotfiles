@@ -264,10 +264,20 @@ log "$COPY" "Copying Neovim configuration..." "$CYAN"
 backup_config "$HOME/.config/nvim"
 cp -r "$SCRIPT_DIR/nvim" "$HOME/.config/"
 
-# Copy Zed configuration
-log "$COPY" "Copying Zed configuration..." "$CYAN"
-backup_config "$HOME/.config/zed/settings.json"
-cp -v "$SCRIPT_DIR/Zed/settings.json" "$HOME/.config/zed/settings.json"
+# Zed configuration comes from its own repo (TasticRice.zed), which ships a
+# platform-aware keymap + settings and its own symlink installer. We clone it to
+# a persistent source dir and run that installer so edits there stay live.
+log "$COPY" "Installing Zed configuration from TasticRice.zed..." "$CYAN"
+ZED_SRC="$HOME/.local/share/tastic-zed"
+if [[ -d "$ZED_SRC/.git" ]]; then
+    git -C "$ZED_SRC" pull --ff-only || log "$WARNING" "Could not update TasticRice.zed" "$YELLOW"
+else
+    git clone https://github.com/SvenBotha/TasticRice.zed.git "$ZED_SRC" \
+        || log "$WARNING" "Could not clone TasticRice.zed" "$YELLOW"
+fi
+if [[ -f "$ZED_SRC/install.sh" ]]; then
+    bash "$ZED_SRC/install.sh" || log "$WARNING" "TasticRice.zed installer failed" "$YELLOW"
+fi
 
 # Copy Sketchybar configuration (referenced by aerospace.toml)
 log "$COPY" "Copying Sketchybar configuration..." "$CYAN"
@@ -347,7 +357,7 @@ echo -e "  ${YELLOW}2.${NC} Configure Powerlevel10k by running: ${BLUE}p10k conf
 echo -e "  ${YELLOW}3.${NC} Start AeroSpace from Applications folder"
 echo -e "  ${YELLOW}4.${NC} Open WezTerm and verify the configuration"
 echo -e "  ${YELLOW}5.${NC} Launch Neovim and let Lazy.nvim install plugins"
-echo -e "  ${YELLOW}6.${NC} Open Zed and verify the theme/font (install the Tokyo Night extension if prompted)"
+echo -e "  ${YELLOW}6.${NC} Open Zed; reload with '\\ space -> workspace: reload' so the symlinked keymap loads"
 
 echo -e "\n${PURPLE}🚀 Happy coding!${NC}\n"
 
@@ -359,7 +369,7 @@ echo -e "  ${CYAN}Shell:${NC}        Zsh with Powerlevel10k theme"
 echo -e "  ${CYAN}Terminal:${NC}     WezTerm with custom config"
 echo -e "  ${CYAN}Window Mgr:${NC}   AeroSpace (tiling window manager)"
 echo -e "  ${CYAN}Editor:${NC}       Neovim with custom configuration"
-echo -e "  ${CYAN}GUI Editor:${NC}   Zed with Tokyo Night + vim mode"
+echo -e "  ${CYAN}GUI Editor:${NC}   Zed (config from TasticRice.zed: leader-key keymap, Cursor base)"
 echo -e "  ${CYAN}Multiplexer:${NC}  Tmux with plugins"
 echo -e "  ${CYAN}Git UI:${NC}       Lazygit"
 echo -e "  ${CYAN}File Browser:${NC} Eza (modern ls)"

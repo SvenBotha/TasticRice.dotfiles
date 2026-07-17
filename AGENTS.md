@@ -59,7 +59,7 @@ re-copies configs (backing up existing ones with a timestamp first). It:
 | `AeroSpace/aerospace.toml` | `~/.aerospace.toml`             |
 | `Tmux/tmux.conf`           | `~/.tmux.conf`                  |
 | `nvim/`                    | `~/.config/nvim/`               |
-| `Zed/settings.json`        | `~/.config/zed/settings.json`   |
+| `TasticRice.zed` (separate GitHub repo) | `~/.config/zed/` (cloned to `~/.local/share/tastic-zed`, symlinked) |
 | `Sketchybar/`              | `~/.config/sketchybar/`         |
 
 ---
@@ -112,8 +112,11 @@ Run these once, in order, after `install.sh` finishes:
    nvim
    ```
 
-4. **Verify Zed** — open it and confirm the Tokyo Night theme + MesloLGS font;
-   install the Tokyo Night extension if prompted.
+4. **Verify Zed** — the config is cloned from the separate `TasticRice.zed`
+   repo into `~/.local/share/tastic-zed` and symlinked into `~/.config/zed`
+   (keymap.json, settings.json). Open Zed and reload with `\ space` →
+   `workspace: reload` so the symlinked leader-key keymap takes effect. Edit the
+   config in `~/.local/share/tastic-zed` (commit/push there, not in dotfiles).
 
 5. **Confirm the terminal font** — set WezTerm/your terminal to
    "MesloLGS Nerd Font Mono" if glyphs look wrong.
