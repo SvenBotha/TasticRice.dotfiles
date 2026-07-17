@@ -54,7 +54,7 @@ preset = 'qwerty'
 inner.horizontal = 8
 inner.vertical = 8
 outer.bottom = 5
-outer.top = [{ monitor.main = 10 }, 10]
+outer.top = [{ monitor.main = 0 }, 0]
 outer.right = 5
 outer.left = 5
 
