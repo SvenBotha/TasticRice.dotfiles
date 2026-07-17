@@ -54,8 +54,8 @@ preset = 'qwerty'
 inner.horizontal = 8
 inner.vertical = 8
 outer.bottom = 5
-# Top gap clears the 32px Sketchybar (+5px) so windows sit snug below the bar.
-outer.top = [{ monitor.main = 37 }, 37]
+# Top gap = the 32px Sketchybar height, so windows sit flush right below the bar.
+outer.top = [{ monitor.main = 32 }, 32]
 outer.right = 5
 outer.left = 5
 
