@@ -121,6 +121,14 @@ Run these once, in order, after `install.sh` finishes:
 6. **(Optional) tmux plugins** — inside tmux press `Ctrl-Space` then `I` to
    force a TPM install if the auto-install was skipped.
 
+7. **Tune the Sketchybar workspace layout** — edit
+   `~/.config/sketchybar/items/aerospace_workspaces.lua` so `WORKSPACE_LAYOUT`
+   matches your monitors (display 1 = main, 2 = secondary; it ships mapped to
+   the numeric workspaces in `aerospace.toml`). Single monitor? Use the
+   `SKETCHYBAR_MINIMAL=1` branch. Then `brew services restart sketchybar`.
+   Optional tweaks live in `items/widgets/wifi.lua` (interface, default `en0`)
+   and `items/widgets/weather.lua` (location).
+
 ---
 
 ## 5. Verification **[auto]**
@@ -148,11 +156,26 @@ done
 
 ## 6. Notes & gotchas
 
-- **Sketchybar ↔ AeroSpace:** `aerospace.toml` runs
-  `sketchybar --trigger aerospace_workspace_change` +
-  `~/.config/sketchybar/plugins/update_workspace_icons.sh` on every workspace
-  change. Both are provided by this repo. If you remove sketchybar, also delete
-  the `exec-on-workspace-change` line from `aerospace.toml`.
+- **Sketchybar is a Lua config** (based on NoamFav's, GPLv3 — see
+  `Sketchybar/LICENSE`). It needs SbarLua + several brew deps + fonts, all wired
+  into `install.sh`. `aerospace.toml` fires
+  `sketchybar --trigger aerospace_workspace_change` on every workspace change and
+  launches sketchybar via `after-startup-command`. If you remove sketchybar,
+  delete both the `exec-on-workspace-change` and `after-startup-command` lines
+  from `aerospace.toml`.
+- **Lua version pin (critical):** the config targets **Lua 5.4**. Homebrew's
+  default `lua` is now 5.5, whose `const` for-loop variables crash the config on
+  load. So `install.sh` installs `lua@5.4` (the `sketchybarrc` shebang points at
+  `/opt/homebrew/opt/lua@5.4/bin/lua`) and pins **SbarLua to commit `791f1b5`**
+  (the last one bundling Lua 5.4.7). Don't bump SbarLua to HEAD without also
+  making the config 5.5-safe.
+- **Disabled widget:** `items/widgets/git_toolkit.lua` (needs NoamFav's personal
+  `iskra` CLI) is commented out in `items/widgets/init.lua`. Re-enable only if
+  you install `iskra`.
+- **Sketchybar build steps clone/build two external repos** (`FelixKratz/SbarLua`
+  via `make`, `kvndrsslr/sketchybar-app-font` via `pnpm`). The app-font's icon-map
+  step may exit non-zero on the `--` arg, but the `.ttf` still installs and the
+  config reads icons from `helpers/app_icons.lua`, so it's harmless.
 - **Pre-existing apps:** casks use `--adopt`, so manually-installed apps are
   taken over rather than causing an error.
 - **Already on zsh:** the `chsh` step compares the shell *basename*, so it won't
