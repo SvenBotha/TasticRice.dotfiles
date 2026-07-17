@@ -176,18 +176,6 @@ fi
 brew trust felixkratz/formulae 2>/dev/null || true
 install_brew_package "sketchybar"
 
-# Extra runtime deps for the Lua-based Sketchybar config (NoamFav / SbarLua):
-#   lua@5.4        - the config targets Lua 5.4 (SbarLua is pinned to 5.4 below;
-#                    Homebrew's default `lua` is now 5.5, whose const for-loop
-#                    variables break this config)
-#   switchaudio-osx- audio device switching for the volume widget
-#   nowplaying-cli - now-playing info for the media widget
-#   pnpm           - builds the sketchybar-app-font (app icon glyphs)
-install_brew_package "lua@5.4"
-install_brew_package "switchaudio-osx"
-install_brew_package "nowplaying-cli"
-install_brew_package "pnpm"
-
 # =============================================================================
 # 🔤 Install Fonts
 # =============================================================================
@@ -198,12 +186,6 @@ echo -e "\n${PURPLE}=== Installing Fonts ===${NC}"
 install_brew_package "font-meslo-lg-nerd-font" "cask"
 install_brew_package "font-fira-code-nerd-font" "cask"
 install_brew_package "font-hack-nerd-font" "cask"
-
-# Fonts required by the Lua Sketchybar config (SF family + Victor Mono).
-install_brew_package "sf-symbols" "cask"
-install_brew_package "font-sf-mono" "cask"
-install_brew_package "font-sf-pro" "cask"
-install_brew_package "font-victor-mono-nerd-font" "cask"
 
 # =============================================================================
 # 🐚 Configure Zsh and Plugins
@@ -290,11 +272,8 @@ cp -v "$SCRIPT_DIR/Zed/settings.json" "$HOME/.config/zed/settings.json"
 # Copy Sketchybar configuration (referenced by aerospace.toml)
 log "$COPY" "Copying Sketchybar configuration..." "$CYAN"
 backup_config "$HOME/.config/sketchybar"
-mkdir -p "$HOME/.config/sketchybar"
 cp -r "$SCRIPT_DIR/Sketchybar/." "$HOME/.config/sketchybar/"
-chmod +x "$HOME/.config/sketchybar/sketchybarrc" 2>/dev/null || true
-chmod +x "$HOME/.config/sketchybar/sb.sh" 2>/dev/null || true
-find "$HOME/.config/sketchybar" -name '*.sh' -exec chmod +x {} + 2>/dev/null || true
+chmod +x "$HOME/.config/sketchybar/sketchybarrc" "$HOME"/.config/sketchybar/plugins/*.sh
 
 # =============================================================================
 # 🎨 Set Wallpaper
@@ -326,50 +305,6 @@ fi
 if command_exists tmux; then
     log "$CONFIG" "Installing Tmux plugins..." "$YELLOW"
     "$HOME/.tmux/plugins/tpm/bin/install_plugins"
-fi
-
-# =============================================================================
-# 🧩 Build Sketchybar Lua/font dependencies (SbarLua + sketchybar-app-font)
-# =============================================================================
-echo -e "\n${PURPLE}=== Building Sketchybar dependencies ===${NC}"
-
-# SbarLua: the Lua<->Sketchybar bindings, built from source and installed to
-# ~/.local/share/sketchybar_lua/. Required for the Lua config to load at all.
-# Pinned to the last commit that vendors Lua 5.4.7 — SbarLua HEAD bundles Lua
-# 5.5, whose const for-loop variables crash this (5.4-era) config on load.
-SBARLUA_COMMIT="791f1b5"
-if [[ ! -f "$HOME/.local/share/sketchybar_lua/sketchybar.so" ]]; then
-    log "$INSTALL" "Building SbarLua (pinned to $SBARLUA_COMMIT, Lua 5.4)..." "$BLUE"
-    sbarlua_tmp="$(mktemp -d)"
-    if git clone https://github.com/FelixKratz/SbarLua.git "$sbarlua_tmp" \
-        && git -C "$sbarlua_tmp" checkout "$SBARLUA_COMMIT" \
-        && make -C "$sbarlua_tmp" install; then
-        log "$SUCCESS" "SbarLua installed" "$GREEN"
-    else
-        log "$WARNING" "SbarLua build failed — sketchybar Lua config won't load until fixed" "$YELLOW"
-    fi
-    rm -rf "$sbarlua_tmp"
-else
-    log "$SUCCESS" "SbarLua already installed" "$GREEN"
-fi
-
-# sketchybar-app-font: the glyphs used for per-workspace app icons. Built with
-# pnpm and installed into ~/Library/Fonts, plus an icon map into the config.
-if command_exists pnpm; then
-    log "$INSTALL" "Building sketchybar-app-font..." "$BLUE"
-    appfont_dir="$HOME/sketchybar-app-font"
-    if [[ ! -d "$appfont_dir" ]]; then
-        git clone --depth 1 https://github.com/kvndrsslr/sketchybar-app-font.git "$appfont_dir" || true
-    fi
-    if [[ -d "$appfont_dir" ]]; then
-        mkdir -p "$HOME/.config/sketchybar/scripts"
-        ( cd "$appfont_dir" \
-            && pnpm install \
-            && pnpm run build:install -- "$HOME/.config/sketchybar/scripts/app_icons.sh" ) \
-            || log "$WARNING" "sketchybar-app-font build failed — app icons may not render" "$YELLOW"
-    fi
-else
-    log "$WARNING" "pnpm not found; skipping app-font build" "$YELLOW"
 fi
 
 # =============================================================================
