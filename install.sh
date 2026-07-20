@@ -144,7 +144,7 @@ install_brew_package "gh"         # GitHub CLI
 # =============================================================================
 echo -e "\n${PURPLE}=== Installing GUI Applications ===${NC}"
 
-install_brew_package "firefox" "cask"
+install_brew_package "zen" "cask"
 install_brew_package "google-chrome" "cask"   # bound to alt-d in AeroSpace
 install_brew_package "visual-studio-code" "cask"
 install_brew_package "cursor" "cask"          # bound to alt-c in AeroSpace

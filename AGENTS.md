@@ -43,7 +43,7 @@ re-copies configs (backing up existing ones with a timestamp first). It:
 - Taps **and trusts** `nikitabobko/tap` (AeroSpace) and `FelixKratz/formulae`
   (sketchybar) — Homebrew 6+ refuses untrusted taps, so the trust step is
   required.
-- Installs GUI casks: firefox, google-chrome, visual-studio-code, cursor,
+- Installs GUI casks: zen, google-chrome, visual-studio-code, cursor,
   microsoft-teams, microsoft-outlook, whatsapp, obsidian, wezterm, zed,
   aerospace, raycast, and Nerd Fonts (Meslo/FiraCode/Hack).
 - Installs Powerlevel10k + zsh-autosuggestions + zsh-syntax-highlighting.
@@ -160,9 +160,10 @@ done
   taken over rather than causing an error.
 - **Already on zsh:** the `chsh` step compares the shell *basename*, so it won't
   prompt for a password if your login shell is already any `zsh`.
-- **Firefox download flakiness:** Mozilla's CDN occasionally 404s a specific
-  version mid-roll. If firefox fails, just re-run `install.sh` (or
-  `brew install --cask firefox`); the non-fatal handler won't block the rest.
+- **Cask download flakiness:** a vendor CDN occasionally 404s a specific version
+  mid-roll (Zen ships from GitHub releases, Chrome/Cursor from their own CDNs).
+  If a cask fails, just re-run `install.sh` (or `brew install --cask <name>`);
+  the non-fatal handler won't block the rest.
 
 ---
 

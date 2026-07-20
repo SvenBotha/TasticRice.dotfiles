@@ -39,7 +39,7 @@ cd ~/dotfiles
 
 ### 🖥️ GUI Applications
 
-- **Firefox** - Web browser
+- **Zen Browser** - Web browser
 - **Visual Studio Code** - Code editor
 - **Microsoft Teams** - Communication
 - **WezTerm** - Terminal emulator
@@ -150,7 +150,7 @@ After running the installation script, complete these steps:
 ### AeroSpace (Window Manager)
 
 - `Alt + Enter` - Open WezTerm with tmux
-- `Alt + W` - Open Firefox
+- `Alt + W` - Open Zen Browser
 - `Alt + C` - Open VS Code
 - `Alt + H/J/K/L` - Navigate windows
 - `Alt + 1-7` - Switch workspaces
